@@ -44,11 +44,49 @@ public class RainRisk extends SolutionTemplate {
         return Math.abs(xPosition) + Math.abs(yPosition);
     }
 
+    @Override
+    protected Long solvePartTwo(Stream<String> stream) throws Exception {
+        final List<String> instructions = stream.collect(Collectors.toList());
+        long xPosition = 0;
+        long yPosition = 0;
+        long waypointXPosition = 10;
+        long waypointYPosition = 1;
+
+        for (String instruction : instructions) {
+            String action = instruction.substring(0, 1);
+            int value = Integer.parseInt(instruction.substring(1));
+
+            if ("L".equals(action) || "R".equals(action)) {
+                if (180 == value) {
+                    waypointXPosition = -waypointXPosition;
+                    waypointYPosition = -waypointYPosition;
+                } else if ((90 == value && "R".equals(action)) || (270 == value && "L".equals(action))) {
+                    long temp = waypointXPosition;
+                    waypointXPosition = waypointYPosition;
+                    waypointYPosition = -temp;
+                } else {
+                    long temp = waypointXPosition;
+                    waypointXPosition = -waypointYPosition;
+                    waypointYPosition = temp;
+                }
+            } else if ("F".equals(action)) {
+                xPosition += waypointXPosition * value;
+                yPosition += waypointYPosition * value;
+            } else {
+                final Direction direction = Direction.valueOf(action);
+                waypointXPosition += direction.xMultiplier * value;
+                waypointYPosition += direction.yMultiplier * value;
+            }
+        }
+
+        return Math.abs(xPosition) + Math.abs(yPosition);
+    }
+
     enum Direction {
-        N(0, 1, 270),
-        E(1, 0, 0),
-        S(0, -1, 90),
-        W(-1, 0, 180);
+        N(1, 0, 270),
+        E(0, 1, 0),
+        S(-1, 0, 90),
+        W(0, -1, 180);
 
         long yMultiplier;
         long xMultiplier;
