@@ -1,4 +1,6 @@
-package com.github.chkypros.aoc2020;
+package com.github.chkypros.aoc2020.day15;
+
+import com.github.chkypros.aoc2020.SolutionTemplate;
 
 import java.util.Arrays;
 import java.util.HashMap;
