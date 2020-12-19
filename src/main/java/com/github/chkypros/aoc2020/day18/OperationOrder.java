@@ -2,6 +2,8 @@ package com.github.chkypros.aoc2020.day18;
 
 import com.github.chkypros.aoc2020.SolutionTemplate;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.function.LongBinaryOperator;
 import java.util.regex.Matcher;
@@ -80,32 +82,34 @@ public class OperationOrder extends SolutionTemplate {
     private long evaluatePartTwo(String expression) {
         long result = 0;
         int matcherIndex = 0;
+        Deque<Long> multiplicationStack = new ArrayDeque<>();
         final Matcher matcher = ELEMENT_PATTERN.matcher(expression);
-        Operation operation = Operation.ADD;
         while (matcher.find(matcherIndex)) {
             matcherIndex = switch (matcher.group()) {
                 case "+" -> {
-                    operation = Operation.ADD;
                     yield matcher.end();
                 }
                 case "*" -> {
-                    operation = Operation.MULTIPLY;
+                    multiplicationStack.push(result);
+                    result = 0L;
                     yield matcher.end();
                 }
                 case "(" -> {
                     final int parenthesisIndex = matcher.start();
                     final int matchingParenthesisIndex = findMatchingParenthesis(expression, parenthesisIndex);
-                    final long value = evaluatePartOne(expression.substring(parenthesisIndex + 1, matchingParenthesisIndex));
-                    result = operation.applyAsLong(result, value);
+                    final long value = evaluatePartTwo(expression.substring(parenthesisIndex + 1, matchingParenthesisIndex));
+                    result = Operation.ADD.applyAsLong(result, value);
                     yield matchingParenthesisIndex;
                 }
                 default -> {
                     final long value = Long.parseLong(matcher.group());
-                    result = operation.applyAsLong(result, value);
+                    result = Operation.ADD.applyAsLong(result, value);
                     yield matcher.end();
                 }
             };
         }
+
+        result = Operation.MULTIPLY.applyAsLong(result, multiplicationStack.stream().mapToLong(v -> v).reduce(1L, (a,b) -> a*b));
 
         return result;
     }
